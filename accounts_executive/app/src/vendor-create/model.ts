@@ -8,7 +8,7 @@
 // when all are approved the vendor exists and bills can be posted to it.
 // Rules follow backend_engin_invention/accounts_executive/03_party_onboarding_design.md (§3, §6).
 
-import { seedVendors } from '../../mock/seed';
+import { EXISTING_VENDORS as seedVendors } from './existing';
 
 export type Stage = 'draft' | 'submitted' | 'sent-back' | 'active';
 export type Level = 'stop' | 'return' | 'warn' | 'ok';

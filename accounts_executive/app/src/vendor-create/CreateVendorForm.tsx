@@ -4,9 +4,8 @@
 
 import { useState, type ReactNode } from 'react';
 import { BadgeCheck, CircleCheck, Landmark, Send, Undo2 } from 'lucide-react';
-import { Button, Callout, Field, PageHeader, TextInput } from '../../ui';
+import { Button, Callout, Field, PageHeader, TextInput } from '../ui';
 import { CATEGORIES, CHECKER_NAME, CHECKER_PART, derive, gstPortal, mustReturn, newRequest, PAPER, pennyDrop, penNeedsCallBack, REQUIRED, runChecks, stops, type Check, type Checker, type Typed, type VendorRequest } from './model';
-import '../t7/t7.css';
 import './vendor-create.css';
 
 /** Which field each check belongs to, so its message shows under that field. */
@@ -116,8 +115,8 @@ export function CreateVendorForm({ onBack }: { onBack?: () => void } = {}) {
         onBack={onBack}
         subtitle="Type in the vendor form Procurement handed you. The system checks as you go; the vendor is created once the checkers approve."
         actions={
-          <span className="t7-demo">
-            <span className="t7-demo__tag">DEMO</span>
+          <span className="vf-demo">
+            <span className="vf-demo__tag">DEMO</span>
             <Button size="sm" onClick={() => set(PAPER['PF-0412'])}>
               Fill from a sample form
             </Button>
@@ -128,7 +127,7 @@ export function CreateVendorForm({ onBack }: { onBack?: () => void } = {}) {
       <form className="vf-card" onSubmit={(e) => { e.preventDefault(); submit(); }}>
         <fieldset className="vf-block">
           <legend>Who the vendor is</legend>
-          <div className="t7-grid">
+          <div className="vf-grid">
             {text('legalName', 'Legal name', { required: true })}
             {text('tradeName', 'Trade name')}
             {text('pan', 'PAN', { required: true, upper: true })}
@@ -154,7 +153,7 @@ export function CreateVendorForm({ onBack }: { onBack?: () => void } = {}) {
 
         <fieldset className="vf-block">
           <legend>How we pay them</legend>
-          <div className="t7-grid">
+          <div className="vf-grid">
             <Field label="Category" required error={tried && missing.has('category') ? 'Required' : null} hint={d.header ? `Goes under ${d.header}` : 'What they supply'}>
               <select className="input" value={t.category} onChange={(e) => set({ category: e.target.value })}>
                 <option value="">Choose…</option>
@@ -195,7 +194,7 @@ export function CreateVendorForm({ onBack }: { onBack?: () => void } = {}) {
 
         <fieldset className="vf-block">
           <legend>Bank account</legend>
-          <div className="t7-grid">
+          <div className="vf-grid">
             {text('bankAccount', 'Account number', { required: true, digits: true })}
             {text('ifsc', 'IFSC', { required: true, upper: true })}
             {text('beneficiary', 'Beneficiary name', { required: true, hint: 'As on the cancelled cheque' })}
@@ -210,7 +209,7 @@ export function CreateVendorForm({ onBack }: { onBack?: () => void } = {}) {
           {penNeedsCallBack(req) && (
             <div className="vc-callback">
               <p className="vc-callback__title">The name at the bank is different. Call the vendor and note it here.</p>
-              <div className="t7-grid">
+              <div className="vf-grid">
                 {text('callBackWho', 'Who you called', { required: true })}
                 {text('callBackNumber', 'Number you used', { required: true })}
                 <Field label="Date" required>

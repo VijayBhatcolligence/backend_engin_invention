@@ -10,7 +10,7 @@ import { checksOf, follow, GSTIN_RE, isEmpty, mask, PARTY_KEYS, partyValues, rou
 import { newRequest, PAPERS, seedAccounts, seedLog, seedNotices, seedParties, seedRequests, START } from './seed';
 import type { Account, ActorKey, Change, FieldValue, LogEntry, Notice, Party, Request, Side } from './types';
 
-export type TabId = 'dashboard' | 'onboarding' | 'parties' | 'checks' | 'backend';
+export type TabId = 'dashboard' | 'tasks' | 'onboarding' | 'parties' | 'checks' | 'backend';
 
 interface Data {
   now: string;

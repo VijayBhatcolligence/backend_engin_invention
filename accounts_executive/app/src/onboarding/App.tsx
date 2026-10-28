@@ -1,8 +1,9 @@
 // Accounts Executive · onboarding only (03_party_onboarding_design.md). Same shell and UI kit as before;
 // the menu now holds just this task, the lists it feeds, the checks, and the backend view.
+// Tasks (../vendor-create/) holds the Create-a-vendor card, which opens a single form.
 
 import { useEffect } from 'react';
-import { Database, LayoutDashboard, ShieldCheck, UserPlus, Users } from 'lucide-react';
+import { Database, LayoutDashboard, ListChecks, ShieldCheck, UserPlus, Users } from 'lucide-react';
 import { fmtDateTime } from '../domain/dates';
 import { AppShell, type ShellTabDef } from '../shell/AppShell';
 import { Toaster } from '../ui';
@@ -14,11 +15,13 @@ import { DemoPanel } from './screens/DemoPanel';
 import { OnboardingScreen } from './screens/OnboardingScreen';
 import { PartiesScreen } from './screens/PartiesScreen';
 import { Profile } from './screens/Profile';
+import { TasksScreen } from '../vendor-create/TasksScreen';
 import { isMine, useOnboarding, type TabId } from './store';
 import './onboarding.css';
 
 const TABS: ShellTabDef[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'tasks', label: 'Tasks', icon: ListChecks },
   { id: 'onboarding', label: 'Onboarding', icon: UserPlus, bleed: true },
   { id: 'parties', label: 'Vendors & customers', icon: Users },
   { id: 'checks', label: 'Checks', icon: ShieldCheck },
@@ -51,6 +54,7 @@ export function App() {
       profile={<Profile />}
       tabs={{
         dashboard: <DashboardScreen />,
+        tasks: <TasksScreen />,
         onboarding: <OnboardingScreen />,
         parties: <PartiesScreen />,
         checks: <ChecksScreen />,
