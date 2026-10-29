@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Screen to Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef1f5; --paper:#ffffff; --ink:#14213d; --ink2:#4a5670; --muted:#8a94a8; --line:#d9dee8;
+  --brand:#0f5c6e; --brand-soft:#e3f1f3; --gold:#b7791f; --gold-soft:#fbf1df;
+  --good:#2f7d4f; --good-soft:#e4f3ea; --bad:#b4413a; --bad-soft:#f8e6e4;
+  --dark:#10203a; --on-dark:#f3f6fb; --on-dark2:#b6c2d6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1220; --paper:#141d2e; --ink:#e8edf6; --ink2:#b2bdd0; --muted:#7f8aa1; --line:#2a3650;
+    --brand:#5cc3d6; --brand-soft:#16303a; --gold:#e3ad55; --gold-soft:#33291a;
+    --good:#6fcf97; --good-soft:#173326; --bad:#f08a80; --bad-soft:#3a1f1d;
+    --dark:#070d18; --on-dark:#eef2f9; --on-dark2:#9fadc4;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --paper:#141d2e; --ink:#e8edf6; --ink2:#b2bdd0; --muted:#7f8aa1; --line:#2a3650;
+  --brand:#5cc3d6; --brand-soft:#16303a; --gold:#e3ad55; --gold-soft:#33291a;
+  --good:#6fcf97; --good-soft:#173326; --bad:#f08a80; --bad-soft:#3a1f1d;
+  --dark:#070d18; --on-dark:#eef2f9; --on-dark2:#9fadc4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,"Segoe UI",Arial,sans-serif;overflow:hidden}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1280px;height:720px;position:relative;transform-origin:center center;flex:none}
+.slide{position:absolute;inset:0;background:var(--paper);border-radius:14px;box-shadow:0 10px 40px rgba(10,20,40,.18);
+  padding:56px 72px 64px;display:none;flex-direction:column;overflow:hidden}
+.slide.on{display:flex}
+.slide.dark{background:var(--dark);color:var(--on-dark)}
+.kicker{font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brand);margin-bottom:10px}
+.dark .kicker{color:#7fd3e2}
+h1{font-family:"Source Serif 4",Georgia,serif;font-size:66px;line-height:1.05;font-weight:700}
+h2{font-family:"Source Serif 4",Georgia,serif;font-size:40px;line-height:1.15;font-weight:700;margin-bottom:8px}
+.lead{font-size:21px;color:var(--ink2);line-height:1.45;max-width:1050px}
+.dark .lead{color:var(--on-dark2)}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:20px}
+.foot{position:absolute;left:72px;right:72px;bottom:22px;display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.dark .foot{color:var(--on-dark2)}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+.card{border:1px solid var(--line);border-radius:12px;padding:18px 20px;background:var(--paper)}
+.card h3{font-size:19px;font-weight:700;margin-bottom:6px}
+.card p{font-size:15.5px;color:var(--ink2);line-height:1.45}
+.card .tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);margin-bottom:6px}
+.card.brand{background:var(--brand-soft);border-color:transparent}
+.card.gold{background:var(--gold-soft);border-color:transparent}
+.card.good{background:var(--good-soft);border-color:transparent}
+.card.bad{background:var(--bad-soft);border-color:transparent}
+.num{font-family:"Source Serif 4",Georgia,serif;font-size:54px;font-weight:700;line-height:1;color:var(--brand)}
+.num.gold{color:var(--gold)}
+.lbl{font-size:15px;color:var(--ink2);margin-top:6px;line-height:1.35}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:600;background:var(--brand-soft);color:var(--brand)}
+.rule{display:flex;gap:18px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}
+.rule:last-child{border-bottom:0}
+.rule .n{flex:none;width:42px;height:42px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:18px}
+.rule b{font-size:20px}
+.rule span{display:block;font-size:16px;color:var(--ink2);margin-top:3px}
+table{border-collapse:collapse;width:100%;font-size:15.5px}
+th{text-align:left;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 12px;border-bottom:2px solid var(--line)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top}
+td:first-child{color:var(--ink);font-weight:600}
+svg text{font-family:Inter,system-ui,sans-serif}
+.quote{font-family:"Source Serif 4",Georgia,serif;font-size:30px;line-height:1.35}
+.step{border-radius:12px;padding:14px 16px;background:var(--brand-soft);position:relative}
+.step .w{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--brand)}
+.step h3{font-size:19px;margin:4px 0 4px}
+.step p{font-size:14.5px;color:var(--ink2);line-height:1.4}
+.step .eg{font-size:13px;color:var(--muted);margin-top:6px;font-style:italic}
+#nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;z-index:5;
+  background:var(--paper);border:1px solid var(--line);border-radius:99px;padding:6px 10px;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+#nav button{border:0;background:transparent;color:var(--ink);font:600 14px Inter,sans-serif;padding:6px 12px;border-radius:99px;cursor:pointer}
+#nav button:hover{background:var(--brand-soft)}
+#count{font-size:13px;color:var(--muted);min-width:60px;text-align:center}
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--brand);z-index:6;transition:width .25s}
+@media print{
+  @page{size:1280px 720px;margin:0}
+  body{overflow:visible;background:#fff}
+  #viewport{position:static;display:block}
+  #stage{transform:none!important;width:auto;height:auto}
+  .slide{display:flex!important;position:relative;width:1280px;height:720px;border-radius:0;box-shadow:none;page-break-after:always}
+  #nav,#bar{display:none}
+}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="viewport"><div id="stage">
+
+<!-- 1 -->
+<section class="slide dark">
+  <div class="body" style="justify-content:center">
+    <div class="kicker">Accounts Executive · engine method · rev 6</div>
+    <h1>From screen to engine</h1>
+    <p class="lead" style="margin-top:22px;font-size:24px">One written method turns <b style="color:#fff">a role's app, its task doc and one task</b> into the <b style="color:#fff">complete backend</b>: the data, the rules, the approvals and the accounting.<br>Anyone who follows it gets <b style="color:#fff">the same answer</b>.</p>
+    <p style="margin-top:44px;color:var(--on-dark2);font-size:16px">Owner: Vijay · Accounting design: team lead (CA) · 29-Oct-2026</p>
+  </div>
+  <div class="foot"><span>Source: 01_task_to_backend_engine.md</span><span>1</span></div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="kicker">The problem</div>
+  <h2>Today, the backend depends on who designs it</h2>
+  <div class="body">
+    <div class="grid g3">
+      <div class="card bad"><h3>Different answers</h3><p>Two engineers given the same screen design different tables, names and rules. Every later module inherits the mismatch.</p></div>
+      <div class="card bad"><h3>Missed controls</h3><p>A check shown on screen (e.g. "GSTIN already our vendor") is easy to forget in the backend. Then it exists only in the UI and can be bypassed.</p></div>
+      <div class="card bad"><h3>Accounting surprises</h3><p>Ledger effects get designed late, inside each module. Sub-ledgers stop tying to the control accounts and audit trails differ by team.</p></div>
+    </div>
+    <div class="card brand" style="margin-top:26px;display:flex;gap:20px;align-items:center">
+      <div class="num" style="font-size:44px">Goal</div>
+      <p style="font-size:19px;color:var(--ink)">A <b>repeatable recipe</b>: the screens are already agreed, so the backend should follow from them by <b>fixed rules</b>, not by taste.</p>
+    </div>
+  </div>
+  <div class="foot"><span>From screen to engine</span><span>2</span></div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="kicker">The idea</div>
+  <h2>Two agreed sources in, complete backend out</h2>
+  <div class="body">
+    <svg viewBox="0 0 1136 360" width="1136" height="360" role="img" aria-label="Two inputs, the role app and the task doc, flow into the method, which produces the backend spec sheet">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--brand)"/></marker></defs>
+      <rect x="0" y="0" width="320" height="158" rx="14" fill="var(--paper)" stroke="var(--line)" stroke-width="2"/>
+      <text x="22" y="32" font-size="13" font-weight="800" fill="var(--brand)" letter-spacing="1.5">INPUT 1 · FIXED</text>
+      <text x="22" y="62" font-size="22" font-weight="700" fill="var(--ink)">The role app <tspan font-size="16" font-weight="600" fill="var(--brand)">= how</tspan></text>
+      <text x="22" y="90" font-size="15.5" fill="var(--ink2)">• screens, fields, checks shown</text>
+      <text x="22" y="114" font-size="15.5" fill="var(--ink2)">• buttons and statuses</text>
+      <text x="22" y="138" font-size="15.5" fill="var(--ink2)">• who checks which part</text>
+      <rect x="0" y="172" width="320" height="158" rx="14" fill="var(--paper)" stroke="var(--gold)" stroke-width="2"/>
+      <text x="22" y="204" font-size="13" font-weight="800" fill="var(--gold)" letter-spacing="1.5">INPUT 2 · READ</text>
+      <text x="22" y="234" font-size="22" font-weight="700" fill="var(--ink)">The task doc <tspan font-size="14" font-weight="600" fill="var(--gold)">= why · who · when</tspan></text>
+      <text x="22" y="262" font-size="15.5" fill="var(--ink2)">• what starts it, how often</text>
+      <text x="22" y="286" font-size="15.5" fill="var(--ink2)">• who checks, who is told</text>
+      <text x="22" y="310" font-size="15.5" fill="var(--ink2)">• what is never allowed, measures</text>
+      <text x="0" y="354" font-size="16" font-weight="700" fill="var(--ink)">+ one task <tspan font-weight="400" fill="var(--muted)">e.g. "Set up a party account"</tspan></text>
+      <line x1="330" y1="79" x2="398" y2="130" stroke="var(--brand)" stroke-width="3" marker-end="url(#ar)"/>
+      <line x1="330" y1="251" x2="398" y2="200" stroke="var(--gold)" stroke-width="3" marker-end="url(#ar)"/>
+      <rect x="408" y="10" width="320" height="310" rx="14" fill="#0f5c6e"/>
+      <text x="432" y="46" font-size="13" font-weight="800" fill="#d6f1f5" letter-spacing="1.5">THE METHOD</text>
+      <text x="432" y="80" font-size="24" font-weight="700" fill="#fff">10 fixed steps</text>
+      <text x="432" y="114" font-size="16" fill="#e6f5f7">Step 0  list both sources</text>
+      <text x="508" y="140" font-size="16" fill="#e6f5f7">+ who owns which fact</text>
+      <text x="432" y="166" font-size="16" fill="#e6f5f7">Steps 1–9  the 9 engine words</text>
+      <text x="432" y="192" font-size="16" fill="#e6f5f7">Step 10  assemble and test</text>
+      <text x="432" y="250" font-size="16" fill="#e6f5f7">Each step:</text>
+      <text x="432" y="280" font-size="18" font-weight="700" fill="#fff">READ → RULE → WRITE</text>
+      <line x1="738" y1="165" x2="806" y2="165" stroke="var(--brand)" stroke-width="3" marker-end="url(#ar)"/>
+      <rect x="816" y="10" width="320" height="310" rx="14" fill="var(--paper)" stroke="var(--line)" stroke-width="2"/>
+      <text x="840" y="46" font-size="13" font-weight="800" fill="var(--brand)" letter-spacing="1.5">OUTPUT</text>
+      <text x="840" y="80" font-size="24" font-weight="700" fill="var(--ink)">Backend spec sheet</text>
+      <text x="840" y="114" font-size="16" fill="var(--ink2)">• exact tables and fields</text>
+      <text x="840" y="140" font-size="16" fill="var(--ink2)">• every API and its rules</text>
+      <text x="840" y="166" font-size="16" fill="var(--ink2)">• approvals, timers, listeners</text>
+      <text x="840" y="192" font-size="16" fill="var(--ink2)">• refusals from "never"</text>
+      <text x="840" y="218" font-size="16" fill="var(--ink2)">• accounting effect</text>
+      <text x="840" y="244" font-size="16" fill="var(--ink2)">• a test for every rule</text>
+      <text x="840" y="270" font-size="16" fill="var(--ink2)">• every difference listed</text>
+    </svg>
+    <p class="lead" style="margin-top:22px">The app is <b>never changed</b> and the task doc is <b>never edited</b>. The method reads both and engineers the logic underneath.</p>
+  </div>
+  <div class="foot"><span>From screen to engine</span><span>3</span></div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="kicker">Ground rules</div>
+  <h2>Five rules that make the answer repeatable</h2>
+  <div class="body" style="justify-content:flex-start;margin-top:14px">
+    <div class="rule"><div class="n">1</div><div><b>The app is fixed; the task doc is read.</b><span>We read the agreed screens and the agreed task cards. We never ask for either to change to suit the backend.</span></div></div>
+    <div class="rule"><div class="n">2</div><div><b>Same input, same output.</b><span>Every name, field type and table comes from a written rule, never from personal preference.</span></div></div>
+    <div class="rule"><div class="n">3</div><div><b>Never invent.</b><span>If both sources are silent, use a listed default or record a gap for a decision. Nothing is guessed silently.</span></div></div>
+    <div class="rule"><div class="n">4</div><div><b>Everything is traced.</b><span>Every table, rule and API points back to the screen item or task-doc fact it came from, and every one of them is used.</span></div></div>
+    <div class="rule"><div class="n">5</div><div><b>One owner per fact.</b><span>Each fact has one owning area. It changes only through an action; everyone else only reads it or listens.</span></div></div>
+  </div>
+  <div class="foot"><span>From screen to engine</span><span>4</span></div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="kicker">Step 0 · read source 1, the app</div>
+  <h2>First, list everything the screen shows</h2>
+  <p class="lead">Each item gets an id, so every later decision can point back to it.</p>
+  <div class="body">
+    <div class="grid g4">
+      <div class="card"><span class="tag">S</span><h3>Screens & lists</h3><p>"Requests waiting for me"</p></div>
+      <div class="card"><span class="tag">F</span><h3>Fields typed</h3><p>Legal name, PAN, GSTIN, credit days</p></div>
+      <div class="card"><span class="tag">W</span><h3>Worked-out values</h3><p>State from GSTIN; "Under (header)"</p></div>
+      <div class="card"><span class="tag">C</span><h3>Checks shown</h3><p>"MSME vendor: max 45 credit days"</p></div>
+      <div class="card"><span class="tag">P</span><h3>Outside checks</h3><p>GST portal, bank penny-drop</p></div>
+      <div class="card"><span class="tag">B</span><h3>Buttons</h3><p>Save, Submit, Approve, Send back</p></div>
+      <div class="card"><span class="tag">T · A</span><h3>Statuses & checkers</h3><p>Draft → Active; who approves which block</p></div>
+      <div class="card"><span class="tag">N · D · L</span><h3>Notices, limits, log</h3><p>Reminders, deadlines, backend sketch</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>From screen to engine</span><span>5</span></div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="kicker">Step 0 · read source 2, the task doc</div>
+  <h2>Then, list what the task doc says</h2>
+  <p class="lead">Found <b>by meaning, not by layout</b>: if the doc's format changes, the facts and the backend stay the same.</p>
+  <div class="body">
+    <div class="grid g4">
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Trigger</span><h3>What starts it, how often</h3><p>"A new vendor is proposed" · "month end"</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Hand-off</span><h3>Who checks it next</h3><p>Accounts Manager: terms · Finance Controller: bank</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Sends</span><h3>Who is told</h3><p>Billing applies the billing instructions</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Held by</span><h3>Whose move it is</h3><p>Needs me · Waiting on others · Coming up</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Never</span><h3>What is never allowed</h3><p>Approves its own work · sets credit limits alone</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Parameters</span><h3>Company rules by name</h3><p>Usual payment terms · MSMED Act maximum days</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Indicators</span><h3>How you see it is kept</h3><p>Vendor proposals waiting, by age</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Type · evidence</span><h3>Kind of work, proof</h3><p>Make → form on the item · scenario A1-17</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>01 §2.4: task-doc facts (K)</span><span>6</span></div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="kicker">Two sources</div>
+  <h2>Each fact has one owning source</h2>
+  <div class="body">
+    <div class="grid g2" style="gap:22px">
+      <div class="card brand"><span class="tag">The app owns · how</span><h3>What the user sees and does</h3><p>Screens, fields, the wording of each check, buttons, statuses, who checks which part, how the work arrives.</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">The task doc owns · why · who · when · never</span><h3>What the business decided</h3><p>What starts the task and how often, who may never do what, who is told, what is measured, the kind of work.</p></div>
+    </div>
+    <table style="margin-top:22px">
+      <tr><th style="width:32%">When…</th><th>Then…</th></tr>
+      <tr><td>One source is silent</td><td>The other fills it, and the trace shows where it came from</td></tr>
+      <tr><td>Both are silent</td><td>A listed default, or a gap for a decision</td></tr>
+      <tr><td>Both speak and disagree</td><td>The owner wins; the difference is listed with both texts. Nothing is dropped silently</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>01 §2.5: which source owns which fact</span><span>7</span></div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="kicker">Steps 1–9 · the 9 engine words</div>
+  <h2>Nine questions, always in the same order</h2>
+  <div class="body" style="margin-top:10px">
+    <div class="grid g3" style="gap:14px">
+      <div class="step"><div class="w">1 · Context</div><h3>Who owns each fact?</h3><p>Party identity → party master. Terms → finance. Ledgers → accounting.</p></div>
+      <div class="step"><div class="w">2 · Entity</div><h3>What record is created?</h3><p>One request, with the life cycle the screen shows.</p></div>
+      <div class="step"><div class="w">3 · Action</div><h3>What can a person do?</h3><p>Each button is one action, guarded by the checks on screen.</p></div>
+      <div class="step"><div class="w">4 · Event</div><h3>What happened?</h3><p>Every action announces one fact, e.g. "request approved".</p></div>
+      <div class="step"><div class="w">5 · Reaction</div><h3>What does the system do next?</h3><p>Automatic work, done by a named automation, never anonymous.</p></div>
+      <div class="step"><div class="w">6 · Approval & timer</div><h3>Who signs off, by when?</h3><p>One approval per checker block; deadlines and reminders.</p></div>
+      <div class="step"><div class="w">7 · Query</div><h3>What does each list show?</h3><p>Every list and tile answers one business question.</p></div>
+      <div class="step"><div class="w">8 · Authority</div><h3>Who may do what?</h3><p>Checked by the server on every call. The screen only hides buttons.</p></div>
+      <div class="step"><div class="w">9 · History</div><h3>What is kept for ever?</h3><p>Each action writes its record, receipt and change log in one go.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Words from engine-concepts.pptx</span><span>8</span></div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="kicker">Worked example · vendor or customer onboarding</div>
+  <h2>One request, one life cycle</h2>
+  <p class="lead">The Accounts Executive types a paper form. Checkers approve their own blocks. The system then sets up the account.</p>
+  <div class="body">
+    <svg viewBox="0 0 1136 320" width="1136" height="320" role="img" aria-label="Request life cycle: draft, submitted, approved, active; returned goes back to draft; sent back and discarded are other endings">
+      <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--ink2)"/></marker></defs>
+      <g font-size="18" font-weight="700">
+        <rect x="0" y="70" width="190" height="70" rx="35" fill="var(--brand-soft)" stroke="var(--brand)" stroke-width="2"/><text x="95" y="112" text-anchor="middle" fill="var(--ink)">Draft</text>
+        <rect x="300" y="70" width="190" height="70" rx="35" fill="var(--brand-soft)" stroke="var(--brand)" stroke-width="2"/><text x="395" y="112" text-anchor="middle" fill="var(--ink)">Submitted</text>
+        <rect x="620" y="70" width="190" height="70" rx="35" fill="var(--brand-soft)" stroke="var(--brand)" stroke-width="2"/><text x="715" y="112" text-anchor="middle" fill="var(--ink)">Approved</text>
+        <rect x="940" y="70" width="190" height="70" rx="35" fill="var(--good-soft)" stroke="var(--good)" stroke-width="2"/><text x="1035" y="112" text-anchor="middle" fill="var(--ink)">Active</text>
+        <rect x="300" y="215" width="190" height="62" rx="31" fill="var(--gold-soft)" stroke="var(--gold)" stroke-width="2"/><text x="395" y="252" text-anchor="middle" fill="var(--ink)">Returned</text>
+        <rect x="0" y="215" width="190" height="62" rx="31" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="2"/><text x="95" y="252" text-anchor="middle" fill="var(--ink)">Sent back</text>
+      </g>
+      <g stroke="var(--ink2)" stroke-width="2.5" fill="none">
+        <line x1="192" y1="105" x2="296" y2="105" marker-end="url(#a2)"/>
+        <line x1="492" y1="105" x2="616" y2="105" marker-end="url(#a2)"/>
+        <line x1="812" y1="105" x2="936" y2="105" marker-end="url(#a2)"/>
+        <line x1="395" y1="142" x2="395" y2="211" marker-end="url(#a2)"/>
+        <path d="M298,262 C230,290 200,200 160,144" marker-end="url(#a2)"/>
+        <line x1="95" y1="142" x2="95" y2="211" marker-end="url(#a2)"/>
+      </g>
+      <g font-size="14.5" fill="var(--ink2)">
+        <text x="244" y="58" text-anchor="middle">AE submits</text>
+        <text x="554" y="58" text-anchor="middle">all checkers approve</text>
+        <text x="874" y="58" text-anchor="middle">system sets it up</text>
+        <text x="410" y="185">a checker returns it</text>
+        <text x="214" y="190">AE fixes it</text>
+        <text x="0" y="305">duplicate party: paper form returned</text>
+      </g>
+    </svg>
+    <p class="lead" style="margin-top:10px">Every status word on screen is the same word in the engine. Nothing is deleted: a dropped draft is marked "discarded".</p>
+  </div>
+  <div class="foot"><span>Task T7 · T12 · T17 "Set up a party account"</span><span>9</span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="kicker">Controls built in</div>
+  <h2>What an auditor gets by default</h2>
+  <div class="body">
+    <div class="grid g3">
+      <div class="card good"><h3>Maker–checker</h3><p>The person who prepares a request can never approve it. Each checker approves only the block they own. Every "never" in the task doc becomes a refusal, with a test.</p></div>
+      <div class="card good"><h3>Checks on the server</h3><p>Every check on screen is also enforced by the backend. A request that breaks a rule is refused, with the rule's id.</p></div>
+      <div class="card good"><h3>Limits have owners</h3><p>Every number (45 credit days, 48 h deadline, 80 % name match) is a setting owned by a named role, e.g. the Accounts Manager.</p></div>
+      <div class="card good"><h3>Nothing is erased</h3><p>Records are never deleted or rewritten. A correction is a new action or a new version, so history is complete.</p></div>
+      <div class="card good"><h3>Full receipt</h3><p>Every action records who did it, in what role, what changed and what came of it, all in one step.</p></div>
+      <div class="card good"><h3>Sensitive data</h3><p>PAN, bank account, phone and email are encrypted and masked. Every full view is logged.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>From screen to engine</span><span>10</span></div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="kicker">Accounting · team lead's design</div>
+  <h2>Every task is one of three kinds</h2>
+  <div class="body">
+    <div class="grid g3">
+      <div class="card brand"><span class="tag">Master</span><h3>Vendor, customer, item, bank</h3><p>Records the master. <b>No journal entry.</b> May open a sub-ledger account under the right control account.</p></div>
+      <div class="card"><span class="tag">Operational</span><h3>Purchase request, PO, sales order</h3><p>Records the document. No journal entry. An open PO feeds commitments.</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Financial</span><h3>GRN, invoices, receipts, payments, payroll</h3><p>Records the document <b>and raises one accounting event</b> that the posting engine turns into journal lines.</p></div>
+    </div>
+    <svg viewBox="0 0 1136 150" width="1136" height="150" style="margin-top:26px" role="img" aria-label="Financial flow: module action, accounting event, posting engine with rules and account mapping, one append-only journal">
+      <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--gold)"/></marker></defs>
+      <g font-size="16">
+        <rect x="0" y="30" width="230" height="84" rx="12" fill="var(--paper)" stroke="var(--line)" stroke-width="2"/>
+        <text x="115" y="66" text-anchor="middle" font-weight="700" fill="var(--ink)">Module approves</text><text x="115" y="90" text-anchor="middle" fill="var(--ink2)">e.g. vendor invoice</text>
+        <rect x="300" y="30" width="230" height="84" rx="12" fill="var(--gold-soft)"/>
+        <text x="415" y="66" text-anchor="middle" font-weight="700" fill="var(--ink)">Accounting event</text><text x="415" y="90" text-anchor="middle" fill="var(--ink2)">amounts, tax; no accounts</text>
+        <rect x="600" y="30" width="250" height="84" rx="12" fill="var(--gold-soft)"/>
+        <text x="725" y="66" text-anchor="middle" font-weight="700" fill="var(--ink)">Posting engine</text><text x="725" y="90" text-anchor="middle" fill="var(--ink2)">posting rules + account mapping</text>
+        <rect x="920" y="30" width="216" height="84" rx="12" fill="var(--gold)"/>
+        <text x="1028" y="66" text-anchor="middle" font-weight="700" fill="var(--paper)">One journal</text><text x="1028" y="90" text-anchor="middle" fill="var(--paper)">append-only, Dr = Cr</text>
+      </g>
+      <g stroke="var(--gold)" stroke-width="3"><line x1="234" y1="72" x2="294" y2="72" marker-end="url(#a3)"/><line x1="534" y1="72" x2="594" y2="72" marker-end="url(#a3)"/><line x1="854" y1="72" x2="914" y2="72" marker-end="url(#a3)"/></g>
+      <text x="725" y="142" text-anchor="middle" font-size="14" fill="var(--muted)">cannot post → exception queue for the AE · closed period → refused</text>
+    </svg>
+  </div>
+  <div class="foot"><span>Modules never choose GL accounts; the rules do</span><span>11</span></div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="kicker">The example's accounting</div>
+  <h2>A new vendor is a sub-ledger account, not a GL one</h2>
+  <div class="body">
+    <svg viewBox="0 0 1136 300" width="1136" height="300" role="img" aria-label="Activation chain in four steps across finance, party master and accounting">
+      <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--brand)"/></marker></defs>
+      <g font-size="15">
+        <rect x="0" y="40" width="250" height="150" rx="14" fill="var(--brand-soft)"/>
+        <text x="20" y="72" font-size="13" font-weight="800" fill="var(--brand)" letter-spacing="1.2">1 · FINANCE</text>
+        <text x="20" y="104" font-size="19" font-weight="700" fill="var(--ink)">Last checker</text><text x="20" y="128" font-size="19" font-weight="700" fill="var(--ink)">approves</text>
+        <text x="20" y="162" fill="var(--ink2)">request is approved</text>
+        <rect x="295" y="40" width="250" height="150" rx="14" fill="var(--brand-soft)"/>
+        <text x="315" y="72" font-size="13" font-weight="800" fill="var(--brand)" letter-spacing="1.2">2 · PARTY MASTER</text>
+        <text x="315" y="104" font-size="19" font-weight="700" fill="var(--ink)">Records the party</text><text x="315" y="128" font-size="19" font-weight="700" fill="var(--ink)">once, for the group</text>
+        <text x="315" y="162" fill="var(--ink2)">or adds a new role</text>
+        <rect x="590" y="40" width="250" height="150" rx="14" fill="var(--gold-soft)"/>
+        <text x="610" y="72" font-size="13" font-weight="800" fill="var(--gold)" letter-spacing="1.2">3 · ACCOUNTING</text>
+        <text x="610" y="104" font-size="19" font-weight="700" fill="var(--ink)">Opens AP / AR</text><text x="610" y="128" font-size="19" font-weight="700" fill="var(--ink)">sub-ledger account</text>
+        <text x="610" y="162" fill="var(--ink2)">under its control account</text>
+        <rect x="885" y="40" width="250" height="150" rx="14" fill="var(--good-soft)"/>
+        <text x="905" y="72" font-size="13" font-weight="800" fill="var(--good)" letter-spacing="1.2">4 · FINANCE</text>
+        <text x="905" y="104" font-size="19" font-weight="700" fill="var(--ink)">Account goes live</text><text x="905" y="128" font-size="19" font-weight="700" fill="var(--ink)">with terms and bank</text>
+        <text x="905" y="162" fill="var(--ink2)">maker is notified</text>
+      </g>
+      <g stroke="var(--brand)" stroke-width="3"><line x1="252" y1="115" x2="290" y2="115" marker-end="url(#a4)"/><line x1="547" y1="115" x2="585" y2="115" marker-end="url(#a4)"/><line x1="842" y1="115" x2="880" y2="115" marker-end="url(#a4)"/></g>
+      <text x="0" y="240" font-size="17" fill="var(--ink2)">Steps 2–4 run automatically, each by a <tspan font-weight="700" fill="var(--ink)">named automation</tspan> that may do only its one job.</text>
+      <text x="0" y="272" font-size="17" fill="var(--ink2)">The screen's <tspan font-weight="700" fill="var(--ink)">"Under (header)"</tspan> = the control account, picked by the category-to-account mapping. <tspan font-weight="700" fill="var(--ink)">No journal entry; balances unchanged.</tspan></text>
+    </svg>
+  </div>
+  <div class="foot"><span>Sub-ledgers always tie to their control accounts</span><span>12</span></div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <div class="kicker">What comes out</div>
+  <h2>One spec sheet, same sections every time</h2>
+  <div class="body">
+    <div class="grid g3">
+      <div class="card"><span class="tag">At a glance</span><h3>Exact counts + table map</h3><p>How many tables, fields, APIs and rules, and where every table goes.</p></div>
+      <div class="card"><span class="tag">Data</span><h3>Tables, fields, database script</h3><p>Ready-to-run definitions with checks, keys and indexes.</p></div>
+      <div class="card"><span class="tag">API</span><h3>Every action and list</h3><p>Plus a standard API file a test tool can check automatically.</p></div>
+      <div class="card"><span class="tag">Workflow</span><h3>Events, automations, approvals</h3><p>Who approves what, deadlines, reminders, escalation.</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Accounting</span><h3>Kind and ledger effect</h3><p>Event, posting rules and account mapping, or "no journal".</p></div>
+      <div class="card"><span class="tag">Assurance</span><h3>Tests, failures, two sources</h3><p>A test per rule, what happens when things fail, data protection, and every app ↔ task-doc difference.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Sections 0, A–U of the method</span><span>13</span></div>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="kicker">Proof on the example · onboarding</div>
+  <h2>The method's output, in numbers</h2>
+  <div class="body">
+    <div class="grid g4" style="gap:22px">
+      <div class="card"><div class="num">26</div><div class="lbl"><b>tables</b>: 14 built by this task, 12 reused</div></div>
+      <div class="card"><div class="num">246</div><div class="lbl"><b>fields</b> across those tables (147 new)</div></div>
+      <div class="card"><div class="num">35</div><div class="lbl"><b>APIs</b>: 16 actions + 19 lists and views</div></div>
+      <div class="card"><div class="num">86</div><div class="lbl"><b>rules</b>: 78 that stop + 8 that warn; each has a test</div></div>
+      <div class="card gold"><div class="num gold">6</div><div class="lbl"><b>refusal rules</b> from the task doc's "never"</div></div>
+      <div class="card gold"><div class="num gold">52</div><div class="lbl"><b>task-doc facts</b> read; 8 differences listed</div></div>
+      <div class="card"><div class="num">91</div><div class="lbl"><b>tests</b>: every rule, warning and refusal</div></div>
+      <div class="card gold"><div class="num gold">0</div><div class="lbl"><b>journal entries</b>: a master never posts</div></div>
+    </div>
+  </div>
+  <div class="foot"><span>Source: 02_example_create_vendor_customer.md, section 0</span><span>14</span></div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <div class="kicker">Where the 26 tables go</div>
+  <h2>Four areas in one database</h2>
+  <div class="body">
+    <div class="grid g4">
+      <div class="card"><div class="num" style="font-size:44px">10</div><h3 style="margin-top:8px">Platform</h3><p>Shared machinery: approvals, receipts, change log, timers, notices. <b>Built once</b>, reused by every task.</p></div>
+      <div class="card"><div class="num" style="font-size:44px">6</div><h3 style="margin-top:8px">Party master</h3><p>Who the party is: name, PAN, GSTINs, phones, roles. <b>New</b>; one record per party for the whole group.</p></div>
+      <div class="card gold"><div class="num gold" style="font-size:44px">3</div><h3 style="margin-top:8px">Accounting</h3><p>Chart of accounts (exists), category-to-account mapping, and the party's sub-ledger account.</p></div>
+      <div class="card brand"><div class="num" style="font-size:44px">7</div><h3 style="margin-top:8px">Finance</h3><p>The onboarding request, portal and bank checks, and the account's terms, credit limit and bank.</p></div>
+    </div>
+    <table style="margin-top:26px">
+      <tr><th>Status</th><th>Meaning</th><th>Tables</th></tr>
+      <tr><td>New</td><td>Proposed and built with this task</td><td>11</td></tr>
+      <tr><td>Replaces</td><td>Proposed; takes the place of an existing finance table</td><td>3</td></tr>
+      <tr><td>Shared</td><td>Built once, used by every later task</td><td>11</td></tr>
+      <tr><td>Exists</td><td>Already there; only read</td><td>1</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>From screen to engine</span><span>15</span></div>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <div class="kicker">When things go wrong</div>
+  <h2>Failures are planned, visible and never undone by deleting</h2>
+  <div class="body">
+    <table>
+      <tr><th style="width:30%">If…</th><th>Then…</th></tr>
+      <tr><td>An action fails halfway</td><td>Nothing is saved. The user can safely press the button again; it never happens twice.</td></tr>
+      <tr><td>An automatic step fails</td><td>Retried 5 times over about 7 hours. Then it lands in the owning team's exception queue with a notice.</td></tr>
+      <tr><td>The chain stops midway</td><td>Finished steps stay done. A retry continues from the failed step; nothing is reversed.</td></tr>
+      <tr><td>The GST portal or bank is down</td><td>The user sees "service unavailable" and tries later. The request is unchanged.</td></tr>
+      <tr><td>A wrong value went live</td><td>Corrected by a new, approved action. The old value stays in history.</td></tr>
+      <tr><td>A request sits stuck</td><td>After 2 hours the owner is alerted.</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>From screen to engine</span><span>16</span></div>
+</section>
+
+<!-- 17 -->
+<section class="slide">
+  <div class="kicker">Is it really repeatable?</div>
+  <h2>We test it by giving the method to two independent AI agents</h2>
+  <div class="body">
+    <table>
+      <tr><th style="width:12%">Run</th><th style="width:42%">Result</th><th>What we did with the differences</th></tr>
+      <tr><td>1</td><td>Same areas, about 25 tables, same actions; about a dozen differences</td><td>Each difference became a new written rule (names, types, chain order)</td></tr>
+      <tr><td>2</td><td><b>Same 25 tables, identical fields in 19, the same 16 core actions</b></td><td>The remaining gaps became rules; two contradictions in the doc were fixed</td></tr>
+      <tr><td>3</td><td>Agents stalled; stopped. Not a result</td><td>Example built from run 2 with the new rules applied</td></tr>
+      <tr><td>Rev 5–6</td><td><span class="pill">not yet tested</span></td><td>Next: one more two-agent run, also with a task doc in another layout, to confirm the same answer</td></tr>
+    </table>
+    <p class="lead" style="margin-top:22px">Every difference between runs is treated as a <b>missing rule</b>, and the method is corrected until the runs agree.</p>
+  </div>
+  <div class="foot"><span>Determinism check, section 7 of the method</span><span>17</span></div>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <div class="kicker">Decisions</div>
+  <h2>What we need from leadership and the team lead</h2>
+  <div class="body">
+    <table>
+      <tr><th style="width:8%">#</th><th>Question</th><th style="width:20%">Status</th></tr>
+      <tr><td>D1</td><td>A party is a sub-ledger account under a control account</td><td>Adopted</td></tr>
+      <tr><td>D2</td><td>Posting happens automatically after approval; failures go to an exception queue</td><td>Proposed</td></tr>
+      <tr><td>D3</td><td>Statutory book first, with room for more books from day one</td><td>Proposed</td></tr>
+      <tr><td>D4</td><td>Perpetual or periodic inventory, chosen per company</td><td>Team lead</td></tr>
+      <tr><td>D5</td><td>A soft-closed period accepts only Accounts Manager-approved adjustments</td><td>Proposed</td></tr>
+      <tr><td>D6</td><td>Tax mapping changes need the Accounts Manager and the Compliance Officer</td><td>Proposed</td></tr>
+      <tr><td>D7</td><td>The app owns screen facts; the task doc owns why, who, when and never. Neither is changed by the method</td><td>Decided</td></tr>
+      <tr><td>D8</td><td>One approval mechanism for every task, in the shared platform</td><td>Proposed</td></tr>
+      <tr><td>D9</td><td>The task doc is a second input, read by meaning in any layout</td><td>Decided</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>Section 9 of the method</span><span>18</span></div>
+</section>
+
+<!-- 19 -->
+<section class="slide dark">
+  <div class="body">
+    <div class="kicker">Next</div>
+    <h2 style="font-size:46px;color:#fff">Build order</h2>
+    <svg viewBox="0 0 1136 130" width="1136" height="130" style="margin-top:26px" role="img" aria-label="Build order: platform, onboarding, accounting core, purchase invoice, then GRN, payment and sales">
+      <g font-size="17" font-weight="700">
+        <rect x="0" y="20" width="200" height="80" rx="12" fill="#1d3557"/><text x="100" y="66" text-anchor="middle" fill="#fff">Platform tables</text>
+        <rect x="234" y="20" width="200" height="80" rx="12" fill="#0f5c6e"/><text x="334" y="58" text-anchor="middle" fill="#fff">Onboarding</text><text x="334" y="82" text-anchor="middle" font-weight="500" font-size="14" fill="#cdeef3">reference task</text>
+        <rect x="468" y="20" width="200" height="80" rx="12" fill="#8a5a14"/><text x="568" y="58" text-anchor="middle" fill="#fff">Accounting core</text><text x="568" y="82" text-anchor="middle" font-weight="500" font-size="14" fill="#f6e4c3">journal, rules</text>
+        <rect x="702" y="20" width="200" height="80" rx="12" fill="#1d3557"/><text x="802" y="66" text-anchor="middle" fill="#fff">Purchase invoice</text>
+        <rect x="936" y="20" width="200" height="80" rx="12" fill="#1d3557"/><text x="1036" y="58" text-anchor="middle" fill="#fff">GRN · payment</text><text x="1036" y="82" text-anchor="middle" font-weight="500" font-size="14" fill="#c9d4e6">then sales</text>
+      </g>
+      <g fill="#7fd3e2"><path d="M226,60l-20,-8v16z"/><path d="M460,60l-20,-8v16z"/><path d="M694,60l-20,-8v16z"/><path d="M928,60l-20,-8v16z"/></g>
+    </svg>
+    <p class="quote" style="margin-top:44px;color:#fff">Agree the screens once. The backend, its controls and its accounting then follow by rule, for every role and every task.</p>
+  </div>
+  <div class="foot"><span>From screen to engine</span><span>19</span></div>
+</section>
+
+</div></div>
+
+<div id="nav" aria-label="Slide navigation">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <span id="count"></span>
+  <button id="next" aria-label="Next slide">→</button>
+  <button id="theme" aria-label="Toggle light or dark">◐</button>
+</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0, stage=document.getElementById('stage');
+  try{var h=parseInt(location.hash.slice(1),10); if(h>=1&&h<=slides.length) i=h-1;}catch(e){}
+  function fit(){var s=Math.min(window.innerWidth/1300, (window.innerHeight-70)/740); stage.style.transform='scale('+s+')';}
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(s,k){s.classList.toggle('on',k===i);});
+    document.getElementById('count').textContent=(i+1)+' / '+slides.length;
+    document.getElementById('bar').style.width=((i+1)/slides.length*100)+'%';
+    try{history.replaceState(null,'','#'+(i+1));}catch(e){}
+  }
+  document.getElementById('prev').onclick=function(){show(i-1)};
+  document.getElementById('next').onclick=function(){show(i+1)};
+  document.getElementById('theme').onclick=function(){
+    var r=document.documentElement, dark=r.getAttribute('data-theme')==='dark'||(!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark');
+  };
+  document.addEventListener('keydown',function(e){
+    if(['ArrowRight','PageDown',' ','Enter'].indexOf(e.key)>=0){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','PageUp','Backspace'].indexOf(e.key)>=0){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(slides.length-1);
+    if(e.key==='f'&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen();
+  });
+  var x0=null;
+  document.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
+  document.addEventListener('touchend',function(e){if(x0===null)return;var d=e.changedTouches[0].clientX-x0;if(Math.abs(d)>40)show(i+(d<0?1:-1));x0=null;});
+  window.addEventListener('resize',fit); fit(); show(i);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vendor Customer Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef1f5; --paper:#ffffff; --ink:#14213d; --ink2:#4a5670; --muted:#8a94a8; --line:#d9dee8;
+  --brand:#0f5c6e; --brand-soft:#e3f1f3; --gold:#b7791f; --gold-soft:#fbf1df;
+  --good:#2f7d4f; --good-soft:#e4f3ea; --bad:#b4413a; --bad-soft:#f8e6e4;
+  --dark:#10203a; --on-dark:#f3f6fb; --on-dark2:#b6c2d6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1220; --paper:#141d2e; --ink:#e8edf6; --ink2:#b2bdd0; --muted:#7f8aa1; --line:#2a3650;
+    --brand:#5cc3d6; --brand-soft:#16303a; --gold:#e3ad55; --gold-soft:#33291a;
+    --good:#6fcf97; --good-soft:#173326; --bad:#f08a80; --bad-soft:#3a1f1d;
+    --dark:#070d18; --on-dark:#eef2f9; --on-dark2:#9fadc4;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --paper:#141d2e; --ink:#e8edf6; --ink2:#b2bdd0; --muted:#7f8aa1; --line:#2a3650;
+  --brand:#5cc3d6; --brand-soft:#16303a; --gold:#e3ad55; --gold-soft:#33291a;
+  --good:#6fcf97; --good-soft:#173326; --bad:#f08a80; --bad-soft:#3a1f1d;
+  --dark:#070d18; --on-dark:#eef2f9; --on-dark2:#9fadc4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,"Segoe UI",Arial,sans-serif;overflow:hidden}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1280px;height:720px;position:relative;transform-origin:center center;flex:none}
+.slide{position:absolute;inset:0;background:var(--paper);border-radius:14px;box-shadow:0 10px 40px rgba(10,20,40,.18);
+  padding:56px 72px 64px;display:none;flex-direction:column;overflow:hidden}
+.slide.on{display:flex}
+.slide.dark{background:var(--dark);color:var(--on-dark)}
+.kicker{font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brand);margin-bottom:10px}
+.dark .kicker{color:#7fd3e2}
+h1{font-family:"Source Serif 4",Georgia,serif;font-size:66px;line-height:1.05;font-weight:700}
+h2{font-family:"Source Serif 4",Georgia,serif;font-size:40px;line-height:1.15;font-weight:700;margin-bottom:8px}
+.lead{font-size:21px;color:var(--ink2);line-height:1.45;max-width:1050px}
+.dark .lead{color:var(--on-dark2)}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:20px}
+.foot{position:absolute;left:72px;right:72px;bottom:22px;display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.dark .foot{color:var(--on-dark2)}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+.card{border:1px solid var(--line);border-radius:12px;padding:18px 20px;background:var(--paper)}
+.card h3{font-size:19px;font-weight:700;margin-bottom:6px}
+.card p{font-size:15.5px;color:var(--ink2);line-height:1.45}
+.card .tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);margin-bottom:6px}
+.card.brand{background:var(--brand-soft);border-color:transparent}
+.card.gold{background:var(--gold-soft);border-color:transparent}
+.card.good{background:var(--good-soft);border-color:transparent}
+.card.bad{background:var(--bad-soft);border-color:transparent}
+.num{font-family:"Source Serif 4",Georgia,serif;font-size:54px;font-weight:700;line-height:1;color:var(--brand)}
+.num.gold{color:var(--gold)}
+.lbl{font-size:15px;color:var(--ink2);margin-top:6px;line-height:1.35}
+.pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:600;background:var(--brand-soft);color:var(--brand)}
+.rule{display:flex;gap:18px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}
+.rule:last-child{border-bottom:0}
+.rule .n{flex:none;width:42px;height:42px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:18px}
+.rule b{font-size:20px}
+.rule span{display:block;font-size:16px;color:var(--ink2);margin-top:3px}
+table{border-collapse:collapse;width:100%;font-size:15.5px}
+th{text-align:left;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 12px;border-bottom:2px solid var(--line)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top}
+td:first-child{color:var(--ink);font-weight:600}
+svg text{font-family:Inter,system-ui,sans-serif}
+.quote{font-family:"Source Serif 4",Georgia,serif;font-size:30px;line-height:1.35}
+.step{border-radius:12px;padding:14px 16px;background:var(--brand-soft);position:relative}
+.step .w{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--brand)}
+.step h3{font-size:19px;margin:4px 0 4px}
+.step p{font-size:14.5px;color:var(--ink2);line-height:1.4}
+.step .eg{font-size:13px;color:var(--muted);margin-top:6px;font-style:italic}
+#nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center;z-index:5;
+  background:var(--paper);border:1px solid var(--line);border-radius:99px;padding:6px 10px;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+#nav button{border:0;background:transparent;color:var(--ink);font:600 14px Inter,sans-serif;padding:6px 12px;border-radius:99px;cursor:pointer}
+#nav button:hover{background:var(--brand-soft)}
+#count{font-size:13px;color:var(--muted);min-width:60px;text-align:center}
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--brand);z-index:6;transition:width .25s}
+@media print{
+  @page{size:1280px 720px;margin:0}
+  body{overflow:visible;background:#fff}
+  #viewport{position:static;display:block}
+  #stage{transform:none!important;width:auto;height:auto}
+  .slide{display:flex!important;position:relative;width:1280px;height:720px;border-radius:0;box-shadow:none;page-break-after:always}
+  #nav,#bar{display:none}
+}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="viewport"><div id="stage">
+
+<!-- 1 -->
+<section class="slide dark">
+  <div class="body" style="justify-content:center">
+    <div class="kicker">Worked example · task T7 · T12 · T17</div>
+    <h1>Setting up a vendor or customer</h1>
+    <p class="lead" style="margin-top:22px;font-size:24px">The method applied to one real task, read from <b style="color:#fff">the Accounts Executive app</b> and <b style="color:#fff">its task doc</b>: the <b style="color:#fff">exact backend</b> it produces, with its controls and accounting.</p>
+    <p style="margin-top:44px;color:var(--on-dark2);font-size:16px">Owner: Vijay · Method rev 6 · 29-Oct-2026</p>
+  </div>
+  <div class="foot"><span>Source: 02_example_create_vendor_customer.md</span><span>1</span></div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="kicker">The business story</div>
+  <h2>A paper form becomes a live account</h2>
+  <div class="body">
+    <svg viewBox="0 0 1136 200" width="1136" height="200" role="img" aria-label="Story in four steps: form handed over, AE types and checks, checkers approve, account goes live">
+      <defs><marker id="b1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--brand)"/></marker></defs>
+      <g font-size="15">
+        <rect x="0" y="10" width="250" height="170" rx="14" fill="var(--brand-soft)"/>
+        <text x="20" y="42" font-size="13" font-weight="800" fill="var(--brand)" letter-spacing="1.2">1 · HANDED OVER</text>
+        <text x="20" y="74" font-size="19" font-weight="700" fill="var(--ink)">Paper form arrives</text>
+        <text x="20" y="104" fill="var(--ink2)">from Procurement (vendor)</text>
+        <text x="20" y="126" fill="var(--ink2)">or Sales (customer), with</text>
+        <text x="20" y="148" fill="var(--ink2)">GST, PAN, cancelled cheque</text>
+        <rect x="295" y="10" width="250" height="170" rx="14" fill="var(--brand-soft)"/>
+        <text x="315" y="42" font-size="13" font-weight="800" fill="var(--brand)" letter-spacing="1.2">2 · ACCOUNTS EXECUTIVE</text>
+        <text x="315" y="74" font-size="19" font-weight="700" fill="var(--ink)">Types and checks</text>
+        <text x="315" y="104" fill="var(--ink2)">system works out values,</text>
+        <text x="315" y="126" fill="var(--ink2)">checks GST portal and bank,</text>
+        <text x="315" y="148" fill="var(--ink2)">stops what is wrong</text>
+        <rect x="590" y="10" width="250" height="170" rx="14" fill="var(--gold-soft)"/>
+        <text x="610" y="42" font-size="13" font-weight="800" fill="var(--gold)" letter-spacing="1.2">3 · CHECKERS</text>
+        <text x="610" y="74" font-size="19" font-weight="700" fill="var(--ink)">Approve their block</text>
+        <text x="610" y="104" fill="var(--ink2)">Accounts Manager, Finance</text>
+        <text x="610" y="126" fill="var(--ink2)">or Credit Controller,</text>
+        <text x="610" y="148" fill="var(--ink2)">Compliance Officer</text>
+        <rect x="885" y="10" width="250" height="170" rx="14" fill="var(--good-soft)"/>
+        <text x="905" y="42" font-size="13" font-weight="800" fill="var(--good)" letter-spacing="1.2">4 · SYSTEM</text>
+        <text x="905" y="74" font-size="19" font-weight="700" fill="var(--ink)">Account goes live</text>
+        <text x="905" y="104" fill="var(--ink2)">party recorded, sub-ledger</text>
+        <text x="905" y="126" fill="var(--ink2)">account opened, teams</text>
+        <text x="905" y="148" fill="var(--ink2)">told they can transact</text>
+      </g>
+      <g stroke="var(--brand)" stroke-width="3"><line x1="252" y1="95" x2="290" y2="95" marker-end="url(#b1)"/><line x1="547" y1="95" x2="585" y2="95" marker-end="url(#b1)"/><line x1="842" y1="95" x2="880" y2="95" marker-end="url(#b1)"/></g>
+    </svg>
+    <div class="grid g3" style="margin-top:24px">
+      <div class="card good"><h3>Ends "Active"</h3><p>The party can be invoiced and paid.</p></div>
+      <div class="card bad"><h3>Ends "Form returned"</h3><p>Already our vendor / customer: the paper goes back with a comment. Nothing is created.</p></div>
+      <div class="card"><h3>Ends "Discarded"</h3><p>Opened by mistake, never submitted. Kept for the record.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Task card, section A</span><span>2</span></div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="kicker">Step 0 · what we read from the app</div>
+  <h2>Everything on the screen is counted and given an id</h2>
+  <div class="body">
+    <div class="grid g4" style="gap:20px">
+      <div class="card"><div class="num">31</div><div class="lbl"><b>fields</b> the AE types (name, PAN, GSTIN, credit days, bank …)</div></div>
+      <div class="card"><div class="num">12</div><div class="lbl"><b>values worked out</b> by the system</div></div>
+      <div class="card"><div class="num">35</div><div class="lbl"><b>check lines</b> shown on screen</div></div>
+      <div class="card"><div class="num">3</div><div class="lbl"><b>outside checks</b>: GST portal, penny-drop, call-back</div></div>
+      <div class="card"><div class="num">22</div><div class="lbl"><b>buttons</b>, each one becomes an action or is marked demo-only</div></div>
+      <div class="card"><div class="num">6</div><div class="lbl"><b>checker blocks</b>: 3 for a vendor, 3 for a customer</div></div>
+      <div class="card"><div class="num">12</div><div class="lbl"><b>notices</b> and "the system does …" lines</div></div>
+      <div class="card"><div class="num">20</div><div class="lbl"><b>lines</b> in the app's backend sketch, all covered</div></div>
+    </div>
+    <p class="lead" style="margin-top:22px">The app was <b>not changed</b>. Every backend item points back to one of these ids, and every id is used.</p>
+  </div>
+  <div class="foot"><span>Inventory, section B</span><span>3</span></div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="kicker">Step 0 · what we read from the task doc</div>
+  <h2>52 facts from the task cards, each with a result</h2>
+  <p class="lead">From the T7, T12 and T17 cards and the role summary (18 · 17 · 10 · 7 facts), found by meaning, not by layout.</p>
+  <div class="body">
+    <div class="grid g4" style="gap:20px">
+      <div class="card good"><div class="num" style="color:var(--good)">24</div><div class="lbl"><b>confirm</b> what the app already does</div><p style="margin-top:10px;font-size:14px;color:var(--ink2)">e.g. "bank account used by another vendor" = our stop rule</p></div>
+      <div class="card gold"><div class="num gold">11</div><div class="lbl"><b>differ</b>: listed with both texts; the app wins on screen facts</div><p style="margin-top:10px;font-size:14px;color:var(--ink2)">e.g. the doc: "Procurement proposes"; the app: a paper form</p></div>
+      <div class="card brand"><div class="num">7</div><div class="lbl"><b>add</b> what the app cannot say</div><p style="margin-top:10px;font-size:14px;color:var(--ink2)">who may never do what · who listens · what is measured</p></div>
+      <div class="card"><div class="num" style="color:var(--ink2)">10</div><div class="lbl"><b>other</b></div><p style="margin-top:10px;font-size:14px;color:var(--ink2)">3 names · 3 gaps · 2 questions answered · 2 for a later task</p></div>
+    </div>
+    <p class="lead" style="margin-top:22px">No new table, API or event was needed. The task doc made the design <b>more exact</b>: refusals, listeners, one indicator, two new gaps.</p>
+  </div>
+  <div class="foot"><span>Section B · K and U.1</span><span>4</span></div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="kicker">Two sources</div>
+  <h2>Where the app and the task doc disagree</h2>
+  <div class="body">
+    <table>
+      <tr><th style="width:6%">#</th><th style="width:17%">What</th><th style="width:25%">App</th><th style="width:25%">Task doc</th><th>Result</th></tr>
+      <tr><td>D1</td><td>How a new party arrives</td><td>A paper form to the AE</td><td>Procurement proposes it in the system</td><td>App</td></tr>
+      <tr><td>D2</td><td>Party identity</td><td>The AE types it for a new party</td><td>Never edited by this role</td><td>App for a new party; the doc's rule for one already in the master</td></tr>
+      <tr><td>D3</td><td>Tax tagging</td><td>Compliance Officer checks every request</td><td>Not named in T7 / T12</td><td>App</td></tr>
+      <tr><td>D4</td><td>Credit days</td><td>Typed, blank</td><td>"Usual terms pre-filled"</td><td>App on screen; the backend suggests the usual days</td></tr>
+      <tr><td>D5</td><td>Credit-limit order</td><td>Credit Controller and AM at the same time</td><td>Credit Controller first, then the AM</td><td>App · <b>to decide with the AM</b></td></tr>
+      <tr><td>D6</td><td>Tasks</td><td>One screen, one request</td><td>Three tasks: T7, T12, T17</td><td>App: one subject</td></tr>
+      <tr><td>D7</td><td>Names</td><td>The method's names</td><td>VendorFinance.Save …</td><td>Method</td></tr>
+      <tr><td>D8</td><td>Later changes</td><td>A "change" request, not built</td><td>Start T7 / T12 / T17 again</td><td>Agreed: a separate task</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>Section U.2</span><span>5</span></div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="kicker">Less typing, fewer mistakes</div>
+  <h2>The system works out what it can</h2>
+  <div class="body">
+    <table>
+      <tr><th style="width:26%">Value</th><th style="width:30%">Worked out from</th><th>Example: Malnad Cocoa Traders</th></tr>
+      <tr><td>State</td><td>First 2 digits of the GSTIN</td><td>29… → Karnataka</td></tr>
+      <tr><td>Constitution</td><td>4th letter of the PAN</td><td>F → partnership firm</td></tr>
+      <tr><td>Under (header)</td><td>Category, via the account mapping</td><td>Goods, MSME → Trade Payables › Goods</td></tr>
+      <tr><td>Section 43B(h)</td><td>Category and MSME status</td><td>MSME vendor → applies: max 45 credit days</td></tr>
+      <tr><td>Account name</td><td>Trade name or legal name</td><td>"Malnad Cocoa Traders"; "(vendor)" added if already a customer</td></tr>
+      <tr><td>Currency · bill-by-bill</td><td>Defaults</td><td>INR · on</td></tr>
+    </table>
+    <p class="lead" style="margin-top:18px">The AE may change a worked value; the change is marked and goes to the Accounts Manager's check.</p>
+  </div>
+  <div class="foot"><span>Worked values W1–W12</span><span>6</span></div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="kicker">Controls · 78 stop rules + 8 warnings + 6 refusals</div>
+  <h2>What stops a bad account from going live</h2>
+  <div class="body">
+    <div class="grid g4">
+      <div class="card"><span class="tag">Identity</span><h3>Is it the right party?</h3><p>PAN and GSTIN format · GSTIN belongs to this PAN · state matches the GSTIN · PIN has 6 digits</p></div>
+      <div class="card bad"><span class="tag" style="color:var(--bad)">Duplicates</span><h3>Do we already have it?</h3><p>GSTIN already our vendor → <b>form returned</b> · bank account used by another party → returned · account name taken</p></div>
+      <div class="card gold"><span class="tag" style="color:var(--gold)">Compliance</span><h3>MSME and 43B(h)</h3><p>MSME vendor above 45 credit days → stop · category says MSME but MSME = No → stop · Udyam format</p></div>
+      <div class="card"><span class="tag">Bank</span><h3>Will payments reach them?</h3><p>Penny-drop must be run · name mismatch → call-back required · a call-back number taken from an email is refused</p></div>
+    </div>
+    <div class="card brand" style="margin-top:22px"><p style="font-size:18px;color:var(--ink)">Every rule runs <b>on the server</b>, not only on screen, and has a code (e.g. <b>SUB-17</b> = MSME credit days). Each rule and each refusal has its own test: 91 tests.</p></div>
+  </div>
+  <div class="foot"><span>Actions and gates, section E · rule tests, section R</span><span>7</span></div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="kicker">Outside checks</div>
+  <h2>Confirmed with the GST portal and the bank</h2>
+  <div class="body">
+    <div class="grid g3">
+      <div class="card"><span class="tag">GST portal</span><h3>Is the GSTIN live?</h3><p>Active → ok. Suspended → warning. <b>Cancelled → stop, form returned.</b> The portal's name is compared with ours (80% match).</p></div>
+      <div class="card"><span class="tag">Penny-drop</span><h3>₹1 sent to the account</h3><p>The bank returns the holder's name. Pass at 80% name match. Change the bank details and it must be run again.</p></div>
+      <div class="card"><span class="tag">Call-back</span><h3>A person confirms</h3><p>Needed when the name does not match. Who was called and on which number is recorded at Submit.</p></div>
+    </div>
+    <table style="margin-top:26px">
+      <tr><th style="width:30%">If the service is down</th><th>Then</th></tr>
+      <tr><td>Timeout 10 s, 2 retries</td><td>The AE sees "service unavailable" and tries later; the request is unchanged</td></tr>
+      <tr><td>Audit</td><td>Every request and answer is kept, with PAN and account numbers masked</td></tr>
+      <tr><td>Testing</td><td>A fake service with fixed answers, so tests never call the real portal or bank</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>Probes P1–P3 · section S.2</span><span>8</span></div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="kicker">Maker–checker</div>
+  <h2>Each checker approves only their own block</h2>
+  <div class="body">
+    <div class="grid g2" style="gap:26px">
+      <div>
+        <h3 style="font-size:20px;margin-bottom:10px">Vendor (payable)</h3>
+        <table>
+          <tr><th>Checker</th><th>Approves</th></tr>
+          <tr><td>Accounts Manager</td><td>Party details, account, terms, MSME (24 fields)</td></tr>
+          <tr><td>Finance Controller</td><td>Bank details and call-back</td></tr>
+          <tr><td>Compliance Officer</td><td>GST / TDS tagging</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3 style="font-size:20px;margin-bottom:10px">Customer (receivable)</h3>
+        <table>
+          <tr><th>Checker</th><th>Approves</th></tr>
+          <tr><td>Accounts Manager</td><td>Party details, account, terms, billing (23 fields)</td></tr>
+          <tr><td>Credit Controller</td><td>Credit limit</td></tr>
+          <tr><td>Compliance Officer</td><td>GST / TCS tagging</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:24px">
+      <div class="card good"><h3>Never self-approved</h3><p>The AE who typed the form cannot approve it.</p></div>
+      <div class="card good"><h3>48-hour deadline</h3><p>A late step moves up to the Accounts Manager (or the Finance Controller).</p></div>
+      <div class="card good"><h3>No rework of approved parts</h3><p>On resubmit, a block that was approved and is unchanged stays approved.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Approvals, section H.1</span><span>9</span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="kicker">From the task doc's "never" list</div>
+  <h2>Six things this role may never do, and how the backend stops them</h2>
+  <div class="body">
+    <table>
+      <tr><th style="width:9%">#</th><th style="width:46%">Never</th><th>How it is stopped</th></tr>
+      <tr><td>NEV-1</td><td>Approve its own work</td><td>Refused (rule DEC-3)</td></tr>
+      <tr><td>NEV-2</td><td>Edit a party already in the master</td><td><b>New refusal</b> (rule SAV-3)</td></tr>
+      <tr><td>NEV-3</td><td>Put bank details live without the Finance Controller</td><td>Impossible by design: only through her approved step</td></tr>
+      <tr><td>NEV-4</td><td>Set a credit limit alone</td><td>Impossible by design: only through the Credit Controller's step</td></tr>
+      <tr><td>NEV-5</td><td>(Billing Executive) change the billing instructions</td><td>Read-only access</td></tr>
+      <tr><td>NEV-6</td><td>Edit a vendor, then approve its voucher</td><td>Kept for the purchase-voucher task: the facts it needs are stored</td></tr>
+    </table>
+    <p class="lead" style="margin-top:20px">Each one has a test: <b>5 new tests</b> here; the sixth comes with the voucher task.</p>
+  </div>
+  <div class="foot"><span>Sections U.3 and R.2</span><span>10</span></div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="kicker">After the last approval</div>
+  <h2>Three automatic steps, each with one job</h2>
+  <div class="body">
+    <svg viewBox="0 0 1136 200" width="1136" height="200" role="img" aria-label="Activation chain: approved, party master records the party, accounting opens the sub-ledger account, finance makes it live">
+      <defs><marker id="b4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--brand)"/></marker></defs>
+      <g font-size="15">
+        <rect x="0" y="10" width="250" height="160" rx="14" fill="var(--brand-soft)"/>
+        <text x="20" y="42" font-size="13" font-weight="800" fill="var(--brand)" letter-spacing="1.2">FINANCE</text>
+        <text x="20" y="74" font-size="19" font-weight="700" fill="var(--ink)">Request approved</text>
+        <text x="20" y="104" fill="var(--ink2)">by the last checker</text>
+        <rect x="295" y="10" width="250" height="160" rx="14" fill="var(--brand-soft)"/>
+        <text x="315" y="42" font-size="13" font-weight="800" fill="var(--brand)" letter-spacing="1.2">PARTY MASTER · AUTO</text>
+        <text x="315" y="74" font-size="19" font-weight="700" fill="var(--ink)">Record the party</text>
+        <text x="315" y="104" fill="var(--ink2)">new party, or a new role</text>
+        <text x="315" y="126" fill="var(--ink2)">for an existing one</text>
+        <rect x="590" y="10" width="250" height="160" rx="14" fill="var(--gold-soft)"/>
+        <text x="610" y="42" font-size="13" font-weight="800" fill="var(--gold)" letter-spacing="1.2">ACCOUNTING · AUTO</text>
+        <text x="610" y="74" font-size="19" font-weight="700" fill="var(--ink)">Open AP / AR account</text>
+        <text x="610" y="104" fill="var(--ink2)">under its control account</text>
+        <text x="610" y="126" fill="var(--ink2)">with an ACC- number</text>
+        <rect x="885" y="10" width="250" height="160" rx="14" fill="var(--good-soft)"/>
+        <text x="905" y="42" font-size="13" font-weight="800" fill="var(--good)" letter-spacing="1.2">FINANCE · AUTO</text>
+        <text x="905" y="74" font-size="19" font-weight="700" fill="var(--ink)">Make it live</text>
+        <text x="905" y="104" fill="var(--ink2)">terms, MSME, bank or</text>
+        <text x="905" y="126" fill="var(--ink2)">credit limit saved</text>
+      </g>
+      <g stroke="var(--brand)" stroke-width="3"><line x1="252" y1="90" x2="290" y2="90" marker-end="url(#b4)"/><line x1="547" y1="90" x2="585" y2="90" marker-end="url(#b4)"/><line x1="842" y1="90" x2="880" y2="90" marker-end="url(#b4)"/></g>
+    </svg>
+    <h3 style="font-size:19px;margin:18px 0 10px">Then the right people are told</h3>
+    <div class="grid g4">
+      <div class="card"><h3>The AE</h3><p>"Vendor active: ACC-… under Trade Payables › Goods"</p></div>
+      <div class="card"><h3>Purchase · Payables</h3><p>Can post vouchers; the MSME payment clock starts</p></div>
+      <div class="card"><h3>Sales · Billing</h3><p>Can confirm orders; billing instructions are ready</p></div>
+      <div class="card"><h3>Payments · vendor</h3><p>New bank details flagged; Udyam reminder every 7 days</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Reactions, section G · 5 named automations do 12 jobs</span><span>11</span></div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="kicker">The accounting view</div>
+  <h2>A party is a sub-ledger account under a control account</h2>
+  <div class="body">
+    <svg viewBox="0 0 1136 250" width="1136" height="250" role="img" aria-label="Control accounts in the general ledger with party sub-ledger accounts under them">
+      <g font-size="16">
+        <rect x="40" y="10" width="440" height="64" rx="12" fill="var(--gold)"/>
+        <text x="260" y="38" text-anchor="middle" font-weight="700" fill="var(--paper)">Trade Payables › Goods</text>
+        <text x="260" y="60" text-anchor="middle" font-size="14" fill="var(--paper)">control account in the GL (Accounts Manager owns it)</text>
+        <rect x="656" y="10" width="440" height="64" rx="12" fill="var(--gold)"/>
+        <text x="876" y="38" text-anchor="middle" font-weight="700" fill="var(--paper)">Trade Receivables › Domestic</text>
+        <text x="876" y="60" text-anchor="middle" font-size="14" fill="var(--paper)">control account in the GL</text>
+        <g stroke="var(--gold)" stroke-width="2.5" fill="none"><path d="M150,76 V130"/><path d="M370,76 V130"/><path d="M876,76 V130"/></g>
+        <rect x="40" y="130" width="220" height="80" rx="12" fill="var(--gold-soft)" stroke="var(--gold)"/>
+        <text x="150" y="162" text-anchor="middle" font-weight="700" fill="var(--ink)">AP · Malnad Cocoa</text><text x="150" y="186" text-anchor="middle" font-size="14" fill="var(--ink2)">new vendor</text>
+        <rect x="270" y="130" width="220" height="80" rx="12" fill="var(--gold-soft)" stroke="var(--gold)"/>
+        <text x="380" y="162" text-anchor="middle" font-weight="700" fill="var(--ink)">AP · Healthy Bite (vendor)</text><text x="380" y="186" text-anchor="middle" font-size="14" fill="var(--ink2)">already a customer</text>
+        <rect x="766" y="130" width="220" height="80" rx="12" fill="var(--gold-soft)" stroke="var(--gold)"/>
+        <text x="876" y="162" text-anchor="middle" font-weight="700" fill="var(--ink)">AR · Coastal Bakes</text><text x="876" y="186" text-anchor="middle" font-size="14" fill="var(--ink2)">new customer, limit ₹4 lakh</text>
+      </g>
+    </svg>
+    <div class="grid g3" style="margin-top:14px">
+      <div class="card gold"><h3>No journal entry</h3><p>Opening an account moves no money. Balances are unchanged and sub-ledgers still tie to the control accounts.</p></div>
+      <div class="card"><h3>The AE never creates a header</h3><p>"Under (header)" comes from the category mapping, owned by the Accounts Manager.</p></div>
+      <div class="card"><h3>One party, many roles</h3><p>A party is recorded once for the group; it can be our vendor and our customer, with one account on each side.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Accounting, section L · team lead's design</span><span>12</span></div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <div class="kicker">The proposed backend, in numbers</div>
+  <h2>Exactly what gets built</h2>
+  <div class="body">
+    <div class="grid g4" style="gap:20px">
+      <div class="card"><div class="num">26</div><div class="lbl"><b>tables</b>: 14 built by this task, 12 reused</div></div>
+      <div class="card"><div class="num">246</div><div class="lbl"><b>fields</b> in those tables (147 new)</div></div>
+      <div class="card"><div class="num">35</div><div class="lbl"><b>APIs</b>: 16 actions + 19 lists and views</div></div>
+      <div class="card"><div class="num">86</div><div class="lbl"><b>rules</b>: 78 stop + 8 warn</div></div>
+      <div class="card gold"><div class="num gold">6</div><div class="lbl"><b>refusal rules</b> from the task doc's "never"</div></div>
+      <div class="card"><div class="num">91</div><div class="lbl"><b>tests</b>: every rule, warning and refusal</div></div>
+      <div class="card"><div class="num">19</div><div class="lbl"><b>events</b> ("request approved", "account opened" …)</div></div>
+      <div class="card gold"><div class="num gold">0</div><div class="lbl"><b>journal entries</b>: a master never posts</div></div>
+    </div>
+    <p class="lead" style="margin-top:22px">Also: 12 automatic jobs by 5 named automations · 9 sensitive fields encrypted · 6 approval steps · 2 timers · 7 limits with owners · 2 outside services · an API file a test tool can check · 52 task-doc facts read.</p>
+  </div>
+  <div class="foot"><span>Backend at a glance, section 0</span><span>13</span></div>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="kicker">Where the 26 tables go</div>
+  <h2>Four areas in one database</h2>
+  <div class="body">
+    <div class="grid g4">
+      <div class="card"><div class="num" style="font-size:44px">10</div><h3 style="margin-top:8px">Platform · shared</h3><p>Approvals, receipts, change log, events, timers, notices, limits, access log. Built once for every task.</p></div>
+      <div class="card"><div class="num" style="font-size:44px">6</div><h3 style="margin-top:8px">Party master · new</h3><p>Party (name, PAN, address), its GSTINs, phones and roles; state and constitution lists.</p></div>
+      <div class="card gold"><div class="num gold" style="font-size:44px">3</div><h3 style="margin-top:8px">Accounting</h3><p>Chart of accounts (exists, read only) · category → control account mapping · the party's sub-ledger account.</p></div>
+      <div class="card brand"><div class="num" style="font-size:44px">7</div><h3 style="margin-top:8px">Finance</h3><p>The request · GST and bank check results · account terms · credit limit · bank details · category list.</p></div>
+    </div>
+    <table style="margin-top:24px">
+      <tr><th>Status</th><th>Tables</th><th>Meaning</th></tr>
+      <tr><td>New</td><td>11</td><td>Proposed, built with this task</td></tr>
+      <tr><td>Replaces</td><td>3</td><td>Take the place of today's finance tables: party terms, classification and compliance; the party ledger account</td></tr>
+      <tr><td>Shared · Exists</td><td>11 · 1</td><td>Built once and reused · already there (chart of accounts)</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>Table map, sections 0.2 – 0.3</span><span>14</span></div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <div class="kicker">Limits the business controls</div>
+  <h2>Seven numbers, each owned by the Accounts Manager</h2>
+  <div class="body">
+    <table>
+      <tr><th style="width:40%">Limit</th><th style="width:15%">Value</th><th>Used for</th></tr>
+      <tr><td>MSMED Act maximum credit days</td><td>45 days</td><td>Stops an MSME vendor with longer terms (43B(h))</td></tr>
+      <tr><td>Penny-drop pass mark</td><td>80 %</td><td>Bank name match needed to pass</td></tr>
+      <tr><td>GST portal name match</td><td>80 %</td><td>Below this, a warning</td></tr>
+      <tr><td>Udyam reminder</td><td>every 7 days</td><td>Reminds the vendor until the Udyam number arrives</td></tr>
+      <tr><td>Approval deadline</td><td>48 hours</td><td>Then the step moves up</td></tr>
+      <tr><td>Usual vendor / customer credit days</td><td>45 / 30 days</td><td>Vendor: suggested as the credit days (task doc). Customer: no rule yet (open point)</td></tr>
+    </table>
+    <p class="lead" style="margin-top:18px">None of these is hard-coded. Changing one is a recorded, owned decision, not a code release.</p>
+  </div>
+  <div class="foot"><span>Parameters, section H.3</span><span>15</span></div>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <div class="kicker">Proved on real cases from the app</div>
+  <h2>18 business scenarios, each a test</h2>
+  <div class="body">
+    <table>
+      <tr><th style="width:32%">Case</th><th>What must happen</th></tr>
+      <tr><td>Malnad Cocoa, new MSME vendor</td><td>3 approvals → party, AP account under Trade Payables › Goods, bank saved, Udyam reminder sent</td></tr>
+      <tr><td>Coastal Bakes, new customer</td><td>Credit Controller approves ₹4 lakh limit → AR account under Trade Receivables › Domestic</td></tr>
+      <tr><td>Sri Lakshmi, already our customer</td><td>Stopped; form returned to Arun with a comment; nothing created</td></tr>
+      <tr><td>Healthy Bite, customer becomes vendor</td><td>No new party; a supplier role and a second account "(vendor)"</td></tr>
+      <tr><td>GSTIN cancelled on the portal</td><td>Submit refused; form can only be returned</td></tr>
+      <tr><td>Bank name mismatch</td><td>Call-back required; a number taken from an email is refused</td></tr>
+      <tr><td>Checker returns the bank block</td><td>AE fixes it; on resubmit the approved party block stays approved</td></tr>
+      <tr><td>Approval not done in 48 h · button pressed twice</td><td>Escalated to the Accounts Manager · recorded once only</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>Contract tests O1–O18</span><span>16</span></div>
+</section>
+
+<!-- 17 -->
+<section class="slide">
+  <div class="kicker">Safe in production</div>
+  <h2>Failures and personal data are planned for</h2>
+  <div class="body">
+    <div class="grid g2" style="gap:26px">
+      <div>
+        <h3 style="font-size:20px;margin-bottom:10px">If something fails</h3>
+        <table>
+          <tr><td>An action fails</td><td>Nothing saved; pressing again is safe</td></tr>
+          <tr><td>An automatic step fails</td><td>Retried 5 times; then in the AE's exception queue</td></tr>
+          <tr><td>Chain stops halfway</td><td>Done steps stay; retry continues; nothing reversed</td></tr>
+          <tr><td>Stuck over 2 hours</td><td>Accounts Manager alerted</td></tr>
+          <tr><td>Wrong value went live</td><td>Fixed by a new approved action; history kept</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3 style="font-size:20px;margin-bottom:10px">Personal and bank data</h3>
+        <table>
+          <tr><td>9 sensitive fields</td><td>PAN, email, phone, bank account, call-back number, check details</td></tr>
+          <tr><td>Encrypted</td><td>At rest, in the database</td></tr>
+          <tr><td>Masked</td><td>Last 4 only, unless the role may see it (FC: bank, AM: PAN)</td></tr>
+          <tr><td>Logged</td><td>Every full view is recorded</td></tr>
+          <tr><td>Kept</td><td>Audit records 8 years; notices 1 year</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Sections S and T</span><span>17</span></div>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <div class="kicker">Open points</div>
+  <h2>What the two sources do not yet say</h2>
+  <div class="body">
+    <table>
+      <tr><th style="width:8%">#</th><th>Gap</th><th style="width:22%">Who decides</th></tr>
+      <tr><td>G1</td><td>Tax tagging (TDS section, GST / RCM, TCS) is approved but its values are never shown on screen</td><td>Team lead · Compliance</td></tr>
+      <tr><td>G2</td><td>Must tax tagging finish before the account goes live? (today: yes)</td><td>Team lead</td></tr>
+      <tr><td>G15</td><td>The task doc's credit-limit <b>recommendation</b> (Credit Controller → AE) is not recorded in the app <span class="pill">new</span></td><td>Credit Controller · AM</td></tr>
+      <tr><td>G16</td><td>Who checks the Udyam status: the Compliance Officer, or only owns the register? <span class="pill">new</span></td><td>Compliance Officer</td></tr>
+      <tr><td>G7</td><td>Change requests are not built, so Udyam reminders cannot be stopped by an action</td><td>Next task</td></tr>
+      <tr><td>G9</td><td>Contracts with the GST portal and bank services (provider, limits)</td><td>IT · Finance Controller</td></tr>
+    </table>
+    <p class="lead" style="margin-top:18px">16 gaps in total (the task doc half-closed G6 and added G15, G16), 15 small technical choices, and difference D5 to decide. None blocks the build.</p>
+  </div>
+  <div class="foot"><span>Gaps, section P</span><span>18</span></div>
+</section>
+
+<!-- 19 -->
+<section class="slide dark">
+  <div class="body">
+    <div class="kicker">What this example shows</div>
+    <h2 style="font-size:46px;color:#fff">One task, fully specified</h2>
+    <div class="grid g3" style="margin-top:26px">
+      <div class="card" style="background:#1d3557;border:0"><h3 style="color:#fff">From two agreed sources</h3><p style="color:#c9d4e6">Every table, rule and API traces back to the app or the task doc. Neither was changed.</p></div>
+      <div class="card" style="background:#1d3557;border:0"><h3 style="color:#fff">Controls by default</h3><p style="color:#c9d4e6">Maker–checker, server-side rules, owned limits, full history, masked data.</p></div>
+      <div class="card" style="background:#1d3557;border:0"><h3 style="color:#fff">Accounting-correct</h3><p style="color:#c9d4e6">Parties sit under control accounts; no journal from a master; ready for the posting engine.</p></div>
+    </div>
+    <p class="quote" style="margin-top:40px;color:#fff">Next: build the platform tables and this task, then use the same method for the purchase invoice.</p>
+  </div>
+  <div class="foot"><span>Vendor and customer onboarding</span><span>19</span></div>
+</section>
+
+</div></div>
+
+<div id="nav" aria-label="Slide navigation">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <span id="count"></span>
+  <button id="next" aria-label="Next slide">→</button>
+  <button id="theme" aria-label="Toggle light or dark">◐</button>
+</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0, stage=document.getElementById('stage');
+  try{var h=parseInt(location.hash.slice(1),10); if(h>=1&&h<=slides.length) i=h-1;}catch(e){}
+  function fit(){var s=Math.min(window.innerWidth/1300, (window.innerHeight-70)/740); stage.style.transform='scale('+s+')';}
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(s,k){s.classList.toggle('on',k===i);});
+    document.getElementById('count').textContent=(i+1)+' / '+slides.length;
+    document.getElementById('bar').style.width=((i+1)/slides.length*100)+'%';
+    try{history.replaceState(null,'','#'+(i+1));}catch(e){}
+  }
+  document.getElementById('prev').onclick=function(){show(i-1)};
+  document.getElementById('next').onclick=function(){show(i+1)};
+  document.getElementById('theme').onclick=function(){
+    var r=document.documentElement, dark=r.getAttribute('data-theme')==='dark'||(!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark');
+  };
+  document.addEventListener('keydown',function(e){
+    if(['ArrowRight','PageDown',' ','Enter'].indexOf(e.key)>=0){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','PageUp','Backspace'].indexOf(e.key)>=0){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(slides.length-1);
+    if(e.key==='f'&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen();
+  });
+  var x0=null;
+  document.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});
+  document.addEventListener('touchend',function(e){if(x0===null)return;var d=e.changedTouches[0].clientX-x0;if(Math.abs(d)>40)show(i+(d<0?1:-1));x0=null;});
+  window.addEventListener('resize',fit); fit(); show(i);
+})();
+</script>
+</body>
+</html>

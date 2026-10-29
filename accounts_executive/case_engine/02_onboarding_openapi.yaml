@@ -1,0 +1,980 @@
+openapi: 3.1.0
+info:
+  title: Party onboarding (T7 · T12 · T17)
+  version: 1.0.0
+  description: Generated from 02_example_create_vendor_customer.md section N, by 01_task_to_backend_engine.md rev 6 (app + task doc). Every action needs Idempotency-Key. x-gates lists the rule ids an action can return.
+servers:
+- url: http://localhost:8000
+paths:
+  /api/v1/finance/party-account-requests:
+    post:
+      operationId: OpenPartyAccountRequest
+      summary: OpenPartyAccountRequest
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - OPN-1
+      - OPN-2
+      - OPN-3
+      - OPN-4
+      - OPN-5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                side: {}
+                from_person_id: {}
+                form_no: {}
+    get:
+      operationId: ListPartyAccountRequests
+      summary: ListPartyAccountRequests
+      parameters:
+      - name: group
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: side
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [payable, receivable]
+      - name: count
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: measure
+        in: query
+        required: false
+        description: Indicator measure (IND-1, task doc K7.IND). With count=true returns oldest_age_hours.
+        schema:
+          type: string
+          enum: [oldest_age]
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: after
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '{rows: [...], count?} (see §I)'
+        '403':
+          $ref: '#/components/responses/Error'
+  /api/v1/finance/party-account-requests/{id}:
+    patch:
+      operationId: SavePartyAccountRequest
+      summary: SavePartyAccountRequest
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - SAV-1
+      - SAV-2
+      - SAV-3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                version: {}
+                values: {}
+    get:
+      operationId: GetPartyAccountRequest
+      summary: GetPartyAccountRequest
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 'subject view: {id, state, version, side, from_person_id, form_no, party_id, round, values, origins, suggestions, checks, probes, approvals, tax_tagging, history, holder, allows}'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  /api/v1/finance/party-account-requests/{id}/use-party:
+    post:
+      operationId: UseParty
+      summary: UseParty
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - USE-1
+      - USE-2
+      - USE-3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                party_id: {}
+  /api/v1/finance/party-account-requests/{id}/check-gstin:
+    post:
+      operationId: CheckGstin
+      summary: CheckGstin
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '502':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - GST-1
+      - GST-2
+      - GST-3
+      - GST-4
+  /api/v1/finance/party-account-requests/{id}/verify-bank-account:
+    post:
+      operationId: VerifyBankAccount
+      summary: VerifyBankAccount
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+        '502':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - BNK-1
+      - BNK-2
+      - BNK-3
+      - BNK-4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                o: {}
+  /api/v1/finance/party-account-requests/{id}/submit:
+    post:
+      operationId: SubmitPartyAccountRequest
+      summary: SubmitPartyAccountRequest
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - SUB-01
+      - SUB-27
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                version: {}
+  /api/v1/finance/party-account-requests/{id}/decide:
+    post:
+      operationId: DecidePartyAccountRequest
+      summary: DecidePartyAccountRequest
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - DEC-1
+      - DEC-2
+      - DEC-3
+      - DEC-4
+      - DEC-5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                step: {}
+                outcome: {}
+                reason: {}
+  /api/v1/finance/party-account-requests/{id}/send-back:
+    post:
+      operationId: SendBackPartyAccountRequest
+      summary: SendBackPartyAccountRequest
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - SBK-1
+      - SBK-2
+      - SBK-3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: {}
+  /api/v1/finance/party-account-requests/{id}/discard:
+    post:
+      operationId: DiscardPartyAccountRequest
+      summary: DiscardPartyAccountRequest
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - DSC-1
+      - DSC-2
+  /api/v1/finance/party-account-requests/{id}/activate:
+    post:
+      operationId: ActivatePartyAccountRequest
+      summary: ActivatePartyAccountRequest
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - ACT-1
+      - ACT-2
+      - ACT-3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subledger_account_id: {}
+                party_id: {}
+  /api/v1/party-master/parties:
+    post:
+      operationId: RegisterParty
+      summary: RegisterParty
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - REG-1
+      - REG-2
+      - REG-3
+      - REG-4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                legal_name: {}
+                trade_name: {}
+                pan: {}
+                gstin: {}
+                value: {}
+                state_code: {}
+                status: {}
+                address_line: {}
+                city: {}
+                pincode: {}
+                contact_person: {}
+                email: {}
+                phone: {}
+                constitution: {}
+                resident: {}
+                role: {}
+                type: {}
+                since: {}
+                entered_by_person_id: {}
+                form_from_person_id: {}
+                form_no: {}
+                source: {}
+                entity: {}
+                id: {}
+    get:
+      operationId: FindParties
+      summary: FindParties
+      parameters:
+      - name: gstin
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: pan
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '[{id, legal_name, pan, city, gstins, roles}]'
+        '403':
+          $ref: '#/components/responses/Error'
+  /api/v1/party-master/parties/{id}/add-role:
+    post:
+      operationId: AddPartyRole
+      summary: AddPartyRole
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - ROL-1
+      - ROL-2
+      - ROL-3
+      - ROL-4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type: {}
+                since: {}
+                entered_by_person_id: {}
+                form_from_person_id: {}
+                form_no: {}
+                source: {}
+                entity: {}
+                id: {}
+  /api/v1/accounting/subledger-accounts:
+    post:
+      operationId: OpenSubledgerAccount
+      summary: OpenSubledgerAccount
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - SLA-1
+      - SLA-2
+      - SLA-3
+      - SLA-4
+      - SLA-5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                party_id: {}
+                subledger: {}
+                name: {}
+                control_account_id: {}
+                source: {}
+                entity: {}
+                id: {}
+    get:
+      operationId: ListSubledgerAccounts
+      summary: ListSubledgerAccounts
+      parameters:
+      - name: party_id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: subledger
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '[{id, party_id, subledger, control_account_id, control_account_name, name, valid_from}]'
+        '403':
+          $ref: '#/components/responses/Error'
+  /api/v1/platform/notices:
+    post:
+      operationId: SendNotice
+      summary: SendNotice
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - NTC-1
+      - NTC-2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to_position: {}
+                to_party_id: {}
+                channel: {}
+                entity: {}
+                entity_id: {}
+                tone: {}
+                title: {}
+                body: {}
+    get:
+      operationId: ListNotices
+      summary: ListNotices
+      parameters:
+      - name: unread
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '[{id, tone, title, body, entity, entity_id, at, read_at}]'
+  /api/v1/platform/notices/{id}/mark:
+    post:
+      operationId: MarkNotice
+      summary: MarkNotice
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - MRK-1
+      - MRK-2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                read: {}
+  /api/v1/platform/approvals/{id}/escalate:
+    post:
+      operationId: EscalateApproval
+      summary: EscalateApproval
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/ActionResult'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+      x-gates:
+      - ESC-1
+      - ESC-2
+  /api/v1/finance/party-accounts:
+    get:
+      operationId: ListPartyAccounts
+      summary: ListPartyAccounts
+      parameters:
+      - name: side
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: udyam_missing
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: count
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: after
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '{rows, count?}'
+        '403':
+          $ref: '#/components/responses/Error'
+  /api/v1/finance/party-accounts/{subledger_account_id}:
+    get:
+      operationId: GetPartyAccount
+      summary: GetPartyAccount
+      parameters:
+      - name: subledger_account_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: account view (finance facts + current bank / credit-limit version + name, control account from accounting)
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  /api/v1/finance/category-codes:
+    get:
+      operationId: ListCategoryCodes
+      summary: ListCategoryCodes
+      parameters:
+      - name: side
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: active
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '[{key, label, attributes}]'
+  /api/v1/finance/party-account-request-gates:
+    get:
+      operationId: ListPartyAccountRequestGates
+      summary: ListPartyAccountRequestGates
+      parameters: []
+      responses:
+        '200':
+          description: '[{id, class, level, when, why}]'
+  /api/v1/finance/party-account-request-routes:
+    get:
+      operationId: ListPartyAccountRequestRoutes
+      summary: ListPartyAccountRequestRoutes
+      parameters:
+      - name: side
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '[{step, position, covers}]'
+  /api/v1/party-master/parties/{id}:
+    get:
+      operationId: GetParty
+      summary: GetParty
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '{id, legal_name, trade_name, pan, gstins, address_line, city, state_code, pincode, contact_person, email, phones, constitution, resident, roles}'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  /api/v1/party-master/state-codes:
+    get:
+      operationId: ListStateCodes
+      summary: ListStateCodes
+      parameters:
+      - name: active
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '[{key, label, attributes}]'
+  /api/v1/party-master/constitution-codes:
+    get:
+      operationId: ListConstitutionCodes
+      summary: ListConstitutionCodes
+      parameters:
+      - name: active
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '[{key, label}]'
+  /api/v1/accounting/subledger-accounts/{id}:
+    get:
+      operationId: GetSubledgerAccount
+      summary: GetSubledgerAccount
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: one row
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  /api/v1/accounting/account-determinations:
+    get:
+      operationId: GetAccountDetermination
+      summary: GetAccountDetermination
+      parameters:
+      - name: key_type
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: key
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: book_id
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '{account_id, account_name}'
+        '404':
+          $ref: '#/components/responses/Error'
+  /api/v1/accounting/accounts:
+    get:
+      operationId: ListControlAccounts
+      summary: ListControlAccounts
+      parameters:
+      - name: is_control
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: side
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '[{id, name}]'
+  /api/v1/hr/persons:
+    get:
+      operationId: ListPersons
+      summary: ListPersons
+      parameters:
+      - name: position
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '[{person_id, name, position}] (declared, hr)'
+  /api/v1/platform/parameters:
+    get:
+      operationId: ListParameters
+      summary: ListParameters
+      parameters: []
+      responses:
+        '200':
+          description: '[{key, value, unit, owner_position, valid_from}]'
+  /api/v1/platform/authority:
+    get:
+      operationId: GetAuthority
+      summary: GetAuthority
+      parameters: []
+      responses:
+        '200':
+          description: '[{action, allowed}]'
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+  schemas:
+    Error:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+            - gate
+            - class
+            - message
+            properties:
+              gate:
+                type: string
+              class:
+                type: string
+                enum:
+                - Input
+                - Consistency
+                - Probe
+                - Uniqueness
+                - Business
+                - State
+                - Authority
+              message:
+                type: string
+              field:
+                type: string
+              send_back:
+                type: boolean
+              use_id:
+                type: string
+    ActionResult:
+      type: object
+      required:
+      - invocation_id
+      - event_id
+      properties:
+        invocation_id:
+          type: string
+        event_id:
+          type: string
+        subject:
+          type: object
+  responses:
+    ActionResult:
+      description: Done
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ActionResult'
+    Error:
+      description: A gate stopped the call (422), a state or version conflict (409), authority (403), not found (404), outside service (502)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
